@@ -12,7 +12,7 @@ This app showcases a collection of helpful GPTs:
 - Custom ChatBot
 
 ## Try It for Free!
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://lifesaver-gpts-app-hchfc9xkbnvxqhru9vognn.streamlit.app/)
 
 ### Enter the OpenAI API key in Streamlit Community Cloud
 
