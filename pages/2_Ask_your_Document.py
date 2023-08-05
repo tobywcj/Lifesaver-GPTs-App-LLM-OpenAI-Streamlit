@@ -8,34 +8,6 @@ from dotenv import load_dotenv, find_dotenv
 
 
 
-# # loading PDF, DOCX and TXT files as LangChain Documents for testing
-# def load_document(file):
-#     import os
-#     import streamlit as st
-    
-#     name, extension = os.path.splitext(file)
-
-#     if extension == '.pdf':
-#         from langchain.document_loaders import UnstructuredPDFLoader
-#         print(f'Loading {file}')
-#         loader = UnstructuredPDFLoader(file)
-#     elif extension == '.docx':
-#         from langchain.document_loaders import Docx2txtLoader
-#         print(f'Loading {file}')
-#         loader = Docx2txtLoader(file)
-#     elif extension == '.txt':
-#         from langchain.document_loaders import TextLoader
-#         loader = TextLoader(file)
-#     else:
-#         st.error('Document format is not supported!')
-#         return None
-
-#     data = loader.load() # return a list of langchain docs, one doc for each page
-#     return data
-
-
-
-
 # splitting data in chunks
 def chunk_data(data, chunk_size=512, chunk_overlap=20):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -250,13 +222,7 @@ if __name__ == "__main__":
 
         if uploaded_file:
             with st.spinner('Reading file ...'):
-                # bytes_data = uploaded_file.read() # writing the file from RAM to the current directory on disk
-                # file_name = os.path.join(os.path.dirname(__file__), 'uploadedFiles', uploaded_file.name)
-                # with open(file_name, 'wb') as f:
-                #     f.write(bytes_data)
-                # data = load_document(file_name)
                 data = [uploaded_file.read().decode()]
-
                 st.session_state.chunks = chunk_data(data, chunk_size=chunk_size) # saving the chunks in the streamlit session state (to be persistent between reruns)
                 chunks = st.session_state.chunks
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
