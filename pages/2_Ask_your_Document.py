@@ -8,37 +8,39 @@ from dotenv import load_dotenv, find_dotenv
 
 
 
-# loading PDF, DOCX and TXT files as LangChain Documents
-def load_document(file):
-    import os
-    import streamlit as st
+# # loading PDF, DOCX and TXT files as LangChain Documents for testing
+# def load_document(file):
+#     import os
+#     import streamlit as st
     
-    name, extension = os.path.splitext(file)
+#     name, extension = os.path.splitext(file)
 
-    if extension == '.pdf':
-        from langchain.document_loaders import UnstructuredPDFLoader
-        print(f'Loading {file}')
-        loader = UnstructuredPDFLoader(file)
-    elif extension == '.docx':
-        from langchain.document_loaders import Docx2txtLoader
-        print(f'Loading {file}')
-        loader = Docx2txtLoader(file)
-    elif extension == '.txt':
-        from langchain.document_loaders import TextLoader
-        loader = TextLoader(file)
-    else:
-        st.error('Document format is not supported!')
-        return None
+#     if extension == '.pdf':
+#         from langchain.document_loaders import UnstructuredPDFLoader
+#         print(f'Loading {file}')
+#         loader = UnstructuredPDFLoader(file)
+#     elif extension == '.docx':
+#         from langchain.document_loaders import Docx2txtLoader
+#         print(f'Loading {file}')
+#         loader = Docx2txtLoader(file)
+#     elif extension == '.txt':
+#         from langchain.document_loaders import TextLoader
+#         loader = TextLoader(file)
+#     else:
+#         st.error('Document format is not supported!')
+#         return None
 
-    data = loader.load() # return a list of langchain docs, one doc for each page
-    return data
+#     data = loader.load() # return a list of langchain docs, one doc for each page
+#     return data
+
+
 
 
 # splitting data in chunks
-def chunk_data(data, chunk_size=512, chunk_overlap=50):
+def chunk_data(data, chunk_size=512, chunk_overlap=20):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    chunks = text_splitter.split_documents(data)
+    chunks = text_splitter.create_documents(data) # use create_doc without loader
     return chunks
 
 
@@ -206,7 +208,6 @@ if __name__ == "__main__":
         elif 'OPENAI_API_KEY' in os.environ:
             api_key = os.environ['OPENAI_API_KEY'] # for DEV ENV
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-        "[View the source code](https://github.com/tobywcj/Lifesaver-GPTs-App.git)"
 
         st.divider()
 
@@ -249,11 +250,12 @@ if __name__ == "__main__":
 
         if uploaded_file:
             with st.spinner('Reading file ...'):
-                bytes_data = uploaded_file.read() # writing the file from RAM to the current directory on disk
-                file_name = os.path.join(os.path.dirname(__file__), 'uploadedFiles', uploaded_file.name)
-                with open(file_name, 'wb') as f:
-                    f.write(bytes_data)
-                data = load_document(file_name)
+                # bytes_data = uploaded_file.read() # writing the file from RAM to the current directory on disk
+                # file_name = os.path.join(os.path.dirname(__file__), 'uploadedFiles', uploaded_file.name)
+                # with open(file_name, 'wb') as f:
+                #     f.write(bytes_data)
+                # data = load_document(file_name)
+                data = [uploaded_file.read().decode()]
 
                 st.session_state.chunks = chunk_data(data, chunk_size=chunk_size) # saving the chunks in the streamlit session state (to be persistent between reruns)
                 chunks = st.session_state.chunks
@@ -296,11 +298,11 @@ if __name__ == "__main__":
         st.chat_message('user').write(question)
 
         # Generating the question response
-        vector_store = st.session_state.vs
-        question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
-        st.session_state.doc_history.append((question, response))
-
-        st.chat_message('assistant').markdown(response)
+        with st.spinner('Generating response ...'):
+            vector_store = st.session_state.vs
+            question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
+            st.session_state.doc_history.append((question, response))
+            st.chat_message('assistant').markdown(response)
     elif not api_key: 
         st.warning('Please enter your OpenAI API Key to continue.')
     elif question and not st.session_state.vs:

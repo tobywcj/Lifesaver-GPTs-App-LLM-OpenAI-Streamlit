@@ -206,6 +206,7 @@ if __name__ == "__main__":
         elif 'OPENAI_API_KEY' in os.environ:
             api_key = os.environ['OPENAI_API_KEY'] # for DEV ENV
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+        "[View the source code](https://github.com/tobywcj/Lifesaver-GPTs-App.git)"
 
         with st.expander('Creativity'):
             temperature = st.slider('Temperature:', min_value=0.0, max_value=2.0, value=1.0, step=0.1)
