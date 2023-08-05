@@ -3,7 +3,6 @@ from streamlit_chat import message
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
-import os
 from dotenv import load_dotenv, find_dotenv
 
 
@@ -175,10 +174,6 @@ if __name__ == "__main__":
         
         # text_input for the OpenAI API key of user
         api_key = st.text_input("OpenAI API Key", key="api_key", type="password")
-        if api_key:
-            os.environ['OPENAI_API_KEY'] = api_key
-        elif 'OPENAI_API_KEY' in os.environ:
-            api_key = os.environ['OPENAI_API_KEY'] # for DEV ENV
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
         st.divider()
@@ -191,7 +186,7 @@ if __name__ == "__main__":
 
             # k number slider widget
             k = st.slider('Response Length', min_value=1, max_value=20, value=3)
-            st.warning('More comprehensive response will cost more tokens. (Recomm 3-5)')
+            st.info('More comprehensive response will cost more tokens. (Recomm 3-5)')
             
             temperature = st.slider('Temperature:', min_value=0.0, max_value=2.0, value=1.0, step=0.1)
             st.info('Larger the number, More Creative is the response.')

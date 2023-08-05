@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from dotenv import load_dotenv, find_dotenv
 from streamlit_chat import message
 from langchain.chat_models import ChatOpenAI
@@ -35,10 +34,6 @@ if __name__ == "__main__":
 
         # text_input for the OpenAI API key of user
         api_key = st.text_input("OpenAI API Key", key="api_key", type="password")
-        if api_key:
-            os.environ['OPENAI_API_KEY'] = api_key
-        elif 'OPENAI_API_KEY' in os.environ:
-            api_key = os.environ['OPENAI_API_KEY'] # for DEV ENV
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
         st.divider()
