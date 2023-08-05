@@ -38,21 +38,22 @@ pip install -r requirements.txt
 streamlit run AI_Email_Assistant.py
 ```
 
+<br>
 
 ## 1. 📧 AI Email Assistant
 
 With AI-powered templates tailored to your chosen scenario, writing professional emails in ONE CLICK. Say goodbye to lengthy messages and hello to concise summaries. Respond effortlessly with perfectly fitting replies, all thanks to this AI chatbot. Simplify your email management and make it a breeze with this powerful tool. 📅💻
 
 ### Features 🌟
-🔹 Schedule a meeting: Generate concise and polite emails to set up meetings or calls.
-🔹 Follow up on a lead or client: Craft persuasive follow-up emails to nurture business relationships.
-🔹 Request information or action: Draft respectful and concise emails to ask for information or assistance.
-🔹 Provide project updates: Create well-structured emails to keep stakeholders informed about project progress.
-🔹 Send professional invoices: Generate polite emails with attached invoices for your clients.
-🔹 Apologize to customers: Compose sincere apology emails to address customer concerns.
-🔹 Request testimonials: Prompt emails asking for testimonials or referrals from clients.
-🔹 Decline invitations: Craft polite and professional emails to decline invitations gracefully.
-🔹 Job application: Compose job application emails showcasing your enthusiasm and qualifications.
+- Schedule a meeting: Generate concise and polite emails to set up meetings or calls.
+- Follow up on a lead or client: Craft persuasive follow-up emails to nurture business relationships.
+- Request information or action: Draft respectful and concise emails to ask for information or assistance.
+- Provide project updates: Create well-structured emails to keep stakeholders informed about project progress.
+- Send professional invoices: Generate polite emails with attached invoices for your clients.
+- Apologize to customers: Compose sincere apology emails to address customer concerns.
+- Request testimonials: Prompt emails asking for testimonials or referrals from clients.
+- Decline invitations: Craft polite and professional emails to decline invitations gracefully.
+- Job application: Compose job application emails showcasing your enthusiasm and qualifications.
 
 ### How to Use 📋
 1. Select an email scenario and fill in the sidebar blanks
@@ -80,7 +81,8 @@ This AI-powered Language Model (LLM) app is designed to make your fitness journe
 5. Ask any fitness-related questions using the chat interface.
 6. Clear the chat history by clicking the "Clear Chat History" button in the sidebar to start a new conversation. 🔄📜
 
-
+<br>
+<br>
 ## 3. 📂 AI Document Consultant
 Don't spend money to hire a consultant for your business! This AI consultant harnesses the capabilities of OpenAI's GPT-3.5-Turbo language model to make your life easier when working with documents. 💼
 
