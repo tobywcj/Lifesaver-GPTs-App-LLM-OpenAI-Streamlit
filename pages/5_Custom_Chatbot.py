@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv, find_dotenv
 from streamlit_chat import message
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import(
@@ -20,8 +19,6 @@ def clear_history():
 if __name__ == "__main__":
 
     ############################################################ System Configuration ############################################################
-
-    load_dotenv(find_dotenv(), override=True)
 
     # creating the history (chat history) in the Streamlit session state
     if 'custom_cb_history' not in st.session_state:

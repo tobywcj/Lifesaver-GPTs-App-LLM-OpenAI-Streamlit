@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv, find_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import(
     SystemMessage, # set the behavior of the assistant
@@ -185,8 +184,6 @@ def clear_history(system_role):
 if __name__ == "__main__":
 
     ############################################################ System Configuration ############################################################
-
-    load_dotenv(find_dotenv(), override=True)
 
     system_role = '''You are a professional email copywriter.'''
 

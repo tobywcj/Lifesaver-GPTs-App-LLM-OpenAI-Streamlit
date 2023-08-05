@@ -3,7 +3,6 @@ from streamlit_chat import message
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
-from dotenv import load_dotenv, find_dotenv
 
 
 
@@ -148,8 +147,6 @@ def clear_history():
 if __name__ == "__main__":
 
     ############################################################ System Configuration ############################################################
-
-    load_dotenv(find_dotenv(), override=True) # loading the OpenAI api key from .env for DEV ENV
 
     system_msg = '''Hi customer, I am a Document Consultant powered by OpenAI's GPT-3.5-Turbo model.
             \n\nI can help you with the following:

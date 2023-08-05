@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv, find_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import(
     SystemMessage, # set the behavior of the assistant
@@ -86,8 +85,6 @@ def clear_history():
 if __name__ == "__main__":
 
     ############################################################ System Configuration ############################################################
-
-    load_dotenv(find_dotenv(), override=True)
 
     # creating the messages (chat history) in the Streamlit session state
     if 'fitness_history' not in st.session_state:

@@ -12,6 +12,5 @@ streamlit-chat
 
 tiktoken
 wikipedia
-python-dotenv
 watchdog
 duckduckgo-search

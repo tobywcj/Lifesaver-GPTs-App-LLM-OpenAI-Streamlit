@@ -4,7 +4,6 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
-from dotenv import load_dotenv, find_dotenv
 
 
 
@@ -20,8 +19,6 @@ def clear_history():
 if __name__ == "__main__":
 
     ############################################################ System Configuration ############################################################
-
-    load_dotenv(find_dotenv(), override=True)
 
     if "internet_cb_history" not in st.session_state:
         st.session_state.internet_cb_history= [

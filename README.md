@@ -11,7 +11,7 @@ This app showcases a collection of helpful GPTs:
 - Chat with Internet
 - Custom ChatBot
 
-## Just Try It for Free!
+## Try It for Free!
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)
 
 ### Get an OpenAI API key 🔑
@@ -33,7 +33,7 @@ This app showcases a collection of helpful GPTs:
     ```
 4. Start the Streamlit app by running the following command in the terminal: 💭
     ```sh
-    streamlit run AI_Email_Assistant.py
+    streamlit run Home.py
     ```
 
 
