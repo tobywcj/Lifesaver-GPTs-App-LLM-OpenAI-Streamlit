@@ -14,6 +14,16 @@ This app showcases a collection of helpful GPTs:
 ## Try It for Free!
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)
 
+### Enter the OpenAI API key in Streamlit Community Cloud
+
+To set the OpenAI API key as an environment variable in Streamlit apps:
+
+1. At the lower right corner, click on < Manage app then click on the vertical "..." followed by clicking on Settings.
+2. This brings the App settings, next click on the Secrets tab and paste the API key into the text box as follows:
+    ```sh
+    OPENAI_API_KEY='xxxxxxxxxx'
+    ```
+
 ### Get an OpenAI API key 🔑
 1. Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
 2. Go to https://platform.openai.com/account/api-keys.
