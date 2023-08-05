@@ -12,33 +12,31 @@ This app showcases a collection of helpful GPTs:
 - Custom ChatBot
 
 ## Just Try It for Free!
-
-Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-examples.streamlit.app/)
 
 ### Get an OpenAI API key 🔑
-
-1. Go to https://platform.openai.com/account/api-keys.
-2. Click on the `+ Create new secret key` button.
-3. Click on the `Create secret key` button.
+1. Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
+2. Go to https://platform.openai.com/account/api-keys.
+3. Click on the `+ Create new secret key` button.
+4. Click on the `Create secret key` button.
 
 ## Run it locally
 
-1️⃣ Download this repository to your local machine. 📥
-2️⃣ Open the terminal or command prompt and navigate to the directory where you downloaded the folder. 💻
-3️⃣ Create a Python virtual environment for the project. Run the following commands in the terminal: 🛠️
-```sh
-python -m venv [project_venv]
-.\[project_venv]\Scripts\activate (Windows)
-source ./[project_venv]/bin/activate (macOS/Linux)
-pip install -r requirements.txt
-```
-4️⃣ Start the Streamlit app by running the following command in the terminal: 💭
-```sh
-streamlit run AI_Email_Assistant.py
-```
+1. Download this repository to your local machine. 📥
+2. Open the terminal or command prompt and navigate to the directory where you downloaded the folder. 💻
+3. Create a Python virtual environment for the project. Run the following commands in the terminal: 🛠️
+    ```sh
+    python -m venv [project_venv]
+    .\[project_venv]\Scripts\activate (Windows)
+    source ./[project_venv]/bin/activate (macOS/Linux)
+    pip install -r requirements.txt
+    ```
+4. Start the Streamlit app by running the following command in the terminal: 💭
+    ```sh
+    streamlit run AI_Email_Assistant.py
+    ```
 
-<br>
+
 
 ## 1. 📧 AI Email Assistant
 
@@ -81,8 +79,7 @@ This AI-powered Language Model (LLM) app is designed to make your fitness journe
 5. Ask any fitness-related questions using the chat interface.
 6. Clear the chat history by clicking the "Clear Chat History" button in the sidebar to start a new conversation. 🔄📜
 
-<br>
-<br>
+
 ## 3. 📂 AI Document Consultant
 Don't spend money to hire a consultant for your business! This AI consultant harnesses the capabilities of OpenAI's GPT-3.5-Turbo language model to make your life easier when working with documents. 💼
 
