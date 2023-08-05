@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
     llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature) # set the model and creativity of the chatbot
     
-    st.title("📂 Ask Your Document a Question")
+    st.title("📂 AI Document Consultant")
 
     # Upload Doc Expander
     with st.expander('Upload a Document'):
@@ -255,17 +255,18 @@ if __name__ == "__main__":
     # Question input widget
     question = st.chat_input(placeholder="What is the document about?")
 
-    if question and st.session_state.vs and api_key:
-        st.chat_message('user').write(question)
+    if question and st.session_state.vs:
+        if api_key:
+            st.chat_message('user').write(question)
 
-        # Generating the question response
-        with st.spinner('Generating response ...'):
-            vector_store = st.session_state.vs
-            question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
-            st.session_state.doc_history.append((question, response))
-            st.chat_message('assistant').markdown(response)
-    elif not api_key: 
-        st.warning('Please enter your OpenAI API Key to continue.')
+            # Generating the question response
+            with st.spinner('Generating response ...'):
+                vector_store = st.session_state.vs
+                question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
+                st.session_state.doc_history.append((question, response))
+                st.chat_message('assistant').markdown(response)
+        elif not api_key: 
+            st.warning('Please enter your OpenAI API Key to continue.')
     elif question and not st.session_state.vs:
         st.warning('Please upload and add the data of your document first.')
 
@@ -286,7 +287,3 @@ if __name__ == "__main__":
             st.chat_message('assistant').markdown(summarize_response)
     elif summary_button:
         st.warning('Please upload your file first.')
-
-
-
-# run the app: streamlit run ./chat_with_documents.py

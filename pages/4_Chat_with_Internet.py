@@ -48,7 +48,9 @@ if __name__ == "__main__":
     for message in st.session_state.internet_cb_history:
         st.chat_message(message["role"]).write(message["content"])
 
-    if question := st.chat_input(placeholder="Ask me anything"):
+    question = st.chat_input(placeholder="Ask me anything currently on the web")
+
+    if question:
         if api_key:
             st.session_state.internet_cb_history.append({"role": "user", "content": question})
             st.chat_message("user").write(question)

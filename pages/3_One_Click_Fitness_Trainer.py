@@ -160,8 +160,10 @@ if __name__ == "__main__":
                                               \nAsk anything on your customized plan, simply fill in the blanks in the side bar and CLICK.''')
 
     # if the user entered a question
-    if api_key:
-        if question := st.chat_input(placeholder="Ask me anything about Fitness and Health"):
+    question = st.chat_input(placeholder="Ask me anything about Fitness and Health")
+
+    if question:
+        if api_key:
             st.session_state.fitness_history.append(
                 HumanMessage(content=question)
             )
@@ -171,8 +173,8 @@ if __name__ == "__main__":
                 response = llm(st.session_state.fitness_history)
 
             st.session_state.fitness_history.append(AIMessage(content=response.content))
-    elif not api_key:
-        st.warning('Please enter your OpenAI API key to continue.')
+        elif not api_key:
+            st.warning('Please enter your OpenAI API key to continue.')
 
     # displaying the messages (chat history)
     for message in st.session_state.fitness_history[1:]:
@@ -180,5 +182,3 @@ if __name__ == "__main__":
             st.chat_message('user').markdown(message.content)
         elif isinstance(message, AIMessage):
             st.chat_message('assistant').markdown(message.content)
-
-# run the app: streamlit run ./project_streamlit_custom_chatgpt.py

@@ -98,5 +98,3 @@ if __name__ == "__main__":
             message(msg.content, is_user=True, key=f'user_{i}') # user's question
         else:
             message(msg.content, is_user=False, key=f'AI_{i}') # ChatGPT response
-
-# run the app: streamlit run ./project_streamlit_custom_chatgpt.py
