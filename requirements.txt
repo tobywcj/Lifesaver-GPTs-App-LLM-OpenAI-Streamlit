@@ -1,10 +1,10 @@
 openai
 langchain
 chromadb
-
+docx2txt
+pypdf
 streamlit
 streamlit-chat
-
 tiktoken
 watchdog
 duckduckgo-search

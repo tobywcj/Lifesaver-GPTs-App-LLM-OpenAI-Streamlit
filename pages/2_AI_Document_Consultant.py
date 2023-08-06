@@ -1,9 +1,59 @@
 import streamlit as st
-from streamlit_chat import message
+import os
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
 
+
+
+# loading PDF, DOCX and TXT files as LangChain Documents
+def load_document(file):
+    import os
+    import io
+    import pypdf
+    import docx2txt
+
+    name, extension = os.path.splitext(file.name)
+    bytes_data = file.read()
+
+    if extension == '.pdf':
+        stream = io.BytesIO(bytes_data)
+        pdf_reader = pypdf.PdfReader(stream)
+        num_pages = len(pdf_reader.pages)
+        data = []
+        for i in range(num_pages):  
+            page = pdf_reader.pages[i]  
+            data.append(page.extract_text())
+    elif extension == '.docx':
+        stream = io.BytesIO(bytes_data)
+        data = [docx2txt.process(stream)]
+    elif extension == '.txt':
+        data = [bytes_data.decode()]
+    else:
+        st.error(f"Unsupported file format: \"{extension}")
+        return None
+
+    return data
+
+
+def validate_openai_api_key(api_key):
+    import openai
+
+    openai.api_key = api_key
+
+    with st.spinner('Validating API key...'):
+        try:
+            response = openai.Completion.create(
+                engine="davinci",
+                prompt="This is a test.",
+                max_tokens=5
+            )
+            # print(response)
+            validity = True
+        except:
+            validity = False
+
+    return validity
 
 
 # splitting data in chunks
@@ -166,11 +216,34 @@ if __name__ == "__main__":
     if 'vs' not in st.session_state:
         st.session_state.vs = ''
 
+    # better to set all the object requiring api keys in the beginning
+
+
     ############################################################ SIDEBAR widgets ############################################################ (for params configuration)
     with st.sidebar:
         
-        # text_input for the OpenAI API key of user
-        api_key = st.text_input("OpenAI API Key", key="api_key", type="password")
+        # Setting up the OpenAI API key via secrets manager
+        if 'OPENAI_API_KEY' in st.secrets:
+            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
+            if api_key_validity:
+                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
+            else:
+                st.error('🚨 API key is invalid and please input again')
+        # Setting up the OpenAI API key via user input
+        else:
+            api_key_input = st.text_input("OpenAI API Key", type="password")
+            api_key_validity = validate_openai_api_key(api_key_input)
+
+            if api_key_input and api_key_validity:
+                os.environ['OPENAI_API_KEY'] = api_key_input
+                st.success("✅ API key is valid and set")
+            elif api_key_input and api_key_validity == False:
+                st.error('🚨 API key is invalid and please input again')
+
+            if not api_key_input:
+                st.warning('Please input your OpenAI API Key')
+        
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
         st.divider()
@@ -202,8 +275,6 @@ if __name__ == "__main__":
 
 
     ############################################################ MAIN PAGE widgets ############################################################
-
-    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature) # set the model and creativity of the chatbot
     
     st.title("📂 AI Document Consultant")
 
@@ -214,7 +285,7 @@ if __name__ == "__main__":
 
         if uploaded_file:
             with st.spinner('Reading file ...'):
-                data = [uploaded_file.read().decode()]
+                data = load_document(uploaded_file)
                 st.session_state.chunks = chunk_data(data, chunk_size=chunk_size) # saving the chunks in the streamlit session state (to be persistent between reruns)
                 chunks = st.session_state.chunks
                 tokens, embedding_cost = calculate_embedding_cost(chunks)
@@ -223,12 +294,12 @@ if __name__ == "__main__":
         # Add data button widget
         add_data = st.button('Add Data', on_click=clear_history) 
 
-        if api_key and uploaded_file and add_data: # if the user browsed a file
+        if api_key_validity and uploaded_file and add_data: # if the user browsed a file
             with st.spinner('Chunking and Embedding file ...'):
                 st.session_state.vs = create_embeddings(chunks) # creating the embeddings and returning the Chroma vector store in the streamlit session state (to be persistent between reruns)
                 st.success('File uploaded, chunked and embedded successfully.')
-        elif not api_key and add_data:
-            st.warning('Please enter your OpenAI API Key to continue.')
+        elif not api_key_validity and add_data:
+            st.warning('Please enter a valid OpenAI API Key to continue.')
         elif not uploaded_file and add_data:
             st.warning('Please upload your file first.')
 
@@ -237,8 +308,7 @@ if __name__ == "__main__":
 
     st.divider()
 
-    if not st.session_state.doc_history:
-        st.chat_message('assistant').write(system_msg)
+    st.chat_message('assistant').write(system_msg)
     
     # The process of generating ChatGPT response
 
@@ -253,23 +323,25 @@ if __name__ == "__main__":
     question = st.chat_input(placeholder="What is the document about?")
 
     if question and st.session_state.vs:
-        if api_key:
+        if api_key_validity:
             st.chat_message('user').write(question)
 
             # Generating the question response
             with st.spinner('Generating response ...'):
                 vector_store = st.session_state.vs
+                llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
                 question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
                 st.session_state.doc_history.append((question, response))
                 st.chat_message('assistant').markdown(response)
-        elif not api_key: 
-            st.warning('Please enter your OpenAI API Key to continue.')
+        elif not api_key_validity: 
+            st.warning('Please enter a valid OpenAI API Key to continue.')
     elif question and not st.session_state.vs:
         st.warning('Please upload and add the data of your document first.')
 
     # Generating the summary of the document
     if summary_button and st.session_state.vs:
         with st.spinner('Summarizing document ...'):
+            llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
             if summary_chain == 'Stuff':
                 summarize_response = stuff_summary_response(llm, st.session_state.chunks)
             elif summary_chain == 'Map Reduce':

@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import(
     SystemMessage, # set the behavior of the assistant
@@ -9,6 +10,26 @@ from langchain.schema import(
 from langchain.chains import LLMChain
 from langchain import PromptTemplate
 
+
+
+def validate_openai_api_key(api_key):
+    import openai
+
+    openai.api_key = api_key
+
+    with st.spinner('Validating API key...'):
+        try:
+            response = openai.Completion.create(
+                engine="davinci",
+                prompt="This is a test.",
+                max_tokens=5
+            )
+            # print(response)
+            validity = True
+        except:
+            validity = False
+
+    return validity
 
 
 def schedule_meeting(llm, name, relationship, discussion_goal):
@@ -195,15 +216,36 @@ if __name__ == "__main__":
 
     with st.sidebar:
 
-        # text_input for the OpenAI API key of user
-        api_key = st.text_input("OpenAI API Key", key="api_key", type="password")
+        # Setting up the OpenAI API key via secrets manager
+        if 'OPENAI_API_KEY' in st.secrets:
+            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
+            if api_key_validity:
+                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
+            else:
+                st.error('🚨 API key is invalid and please input again')
+        # Setting up the OpenAI API key via user input
+        else:
+            api_key_input = st.text_input("OpenAI API Key", type="password")
+            api_key_validity = validate_openai_api_key(api_key_input)
+
+            if api_key_input and api_key_validity:
+                os.environ['OPENAI_API_KEY'] = api_key_input
+                st.success("✅ API key is valid and set")
+            elif api_key_input and api_key_validity == False:
+                st.error('🚨 API key is invalid and please input again')
+
+            if not api_key_input:
+                st.warning('Please input your OpenAI API Key')
+        
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
         with st.expander('Creativity'):
             temperature = st.slider('Temperature:', min_value=0.0, max_value=2.0, value=1.0, step=0.1)
             st.info('Larger the number, More Creative is the response.')
 
-        llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=temperature)
+        if api_key_validity:
+            llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=temperature)
 
         st.divider()
 
@@ -219,7 +261,7 @@ if __name__ == "__main__":
             discussion_goal = st.text_area('Discussion Goal')
 
             if st.button('Prompt your Email', key='schedule_meeting_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if name and relationship and discussion_goal:
                         with st.spinner('Generating your email ...'):
                             schedule_meeting_email = schedule_meeting(llm, name, relationship, discussion_goal) # adding the response's content to the session state
@@ -227,8 +269,8 @@ if __name__ == "__main__":
 
                     elif not name or not relationship or not discussion_goal:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
         # 2. Follow up on a lead or client
         with st.expander('Follow up on a lead or client'):
@@ -243,7 +285,7 @@ if __name__ == "__main__":
             event = st.text_input('Event')
             benefits = st.text_input('Benefits we offer')
 
-            if st.button('Prompt your Email', key='follow_up_button', on_click=lambda: clear_history(system_role)) and api_key:
+            if st.button('Prompt your Email', key='follow_up_button', on_click=lambda: clear_history(system_role)) and api_key_validity:
                 if my_position and my_company and our_product_or_service and client_name and client_company and event and benefits:
                     with st.spinner('Generating your email ...'):
                         follow_up_email = follow_up(llm, my_position, my_company, our_product_or_service, client_name, client_company, event, benefits)
@@ -251,8 +293,8 @@ if __name__ == "__main__":
 
                 elif not my_position or not my_company or not our_product_or_service or not client_name or not client_company or not event or not benefits:
                     st.warning('Please fill in all the fields.')
-            elif not api_key:
-                st.warning('Please enter your OpenAI API key to continue.')
+            elif not api_key_validity:
+                st.warning('Please enter a valid OpenAI API Key to continue.')
 
         # 3. Request something
         with st.expander('Request something'):
@@ -263,7 +305,7 @@ if __name__ == "__main__":
             request_purpose = st.text_input('Request Purpose')
 
             if st.button('Prompt your Email', key='request_sth_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if information_or_action and request_purpose:
                         with st.spinner('Generating your email ...'):
                             request_sth_email = request_sth(llm, information_or_action, request_purpose)
@@ -271,8 +313,8 @@ if __name__ == "__main__":
 
                     elif not information_or_action or not request_purpose:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
 
         # 4. project updates
@@ -288,7 +330,7 @@ if __name__ == "__main__":
             challenges = st.text_area('Challenges Encountered')
 
             if st.button('Prompt your Email', key='project_update_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if person_or_group and project and completed_tasks and upcoming_milestones and challenges:
                         with st.spinner('Generating your email ...'):
                             project_update_email = project_update(llm, person_or_group, project, completed_tasks, upcoming_milestones, challenges)
@@ -296,8 +338,8 @@ if __name__ == "__main__":
 
                     elif not information_or_action or not request_purpose:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
 
         # 5. Submit an invoice or payment reminder
@@ -311,7 +353,7 @@ if __name__ == "__main__":
             due_date = st.text_input('Due Date')
 
             if st.button('Prompt your Email', key='invoice_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if client_name and service and cost and due_date:
                         with st.spinner('Generating your email ...'):
                             invoice_email = invoice(llm, client_name, service, cost, due_date)
@@ -319,8 +361,8 @@ if __name__ == "__main__":
 
                     elif not client_name or not service or not cost or not due_date:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
         
         # 6. Apologize to a client or customer
@@ -334,7 +376,7 @@ if __name__ == "__main__":
             offering = st.text_input('Offering (e.g., Discount, Free Delivery, Gift Card)')
 
             if st.button('Prompt your Email', key='apology_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if my_job_title and my_company and reason and offering:
                         with st.spinner('Generating your email ...'):
                             apology_email = apology(llm, my_job_title, my_company, reason, offering)
@@ -342,8 +384,8 @@ if __name__ == "__main__":
 
                     elif not my_job_title or not my_company or not reason or not offering:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
 
         # 7. Ask for a referral or testimonial from a client
@@ -355,7 +397,7 @@ if __name__ == "__main__":
             product_or_service = st.text_input("Product or Service")
 
             if st.button('Prompt your Email', key='testimonial_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if client_name and product_or_service:
                         with st.spinner('Generating your email ...'):
                             testimonial_email = testimonial(llm, client_name, product_or_service)
@@ -363,8 +405,8 @@ if __name__ == "__main__":
 
                     elif not client_name or not product_or_service:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
         
         # 8. Decline an invitation
@@ -376,7 +418,7 @@ if __name__ == "__main__":
             reason_unavailable = st.text_area("Reason for Unavailability")
 
             if st.button('Prompt your Email', key='decline_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if client_name and product_or_service:
                         with st.spinner('Generating your email ...'):
                             decline_email = decline(llm, purpose_of_invitation, reason_unavailable)
@@ -384,8 +426,8 @@ if __name__ == "__main__":
 
                     elif not client_name or not product_or_service:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
         
 
         # 9. Send a job application
@@ -400,7 +442,7 @@ if __name__ == "__main__":
             hiring_manager = st.text_input('Hiring Manager')
 
             if st.button('Prompt your Email', key='job_application_button', on_click=lambda: clear_history(system_role)):
-                if api_key:
+                if api_key_validity:
                     if job_title and company_name and reasons_to_hire and hiring_manager:
                         with st.spinner('Generating your email ...'):
                             job_application_email = job_application(llm, job_title, company_name, reasons_to_hire, hiring_manager)
@@ -408,8 +450,8 @@ if __name__ == "__main__":
 
                     elif not job_title and not company_name and not reasons_to_hire and not hiring_manager:
                         st.warning('Please fill in all the fields.')
-                elif not api_key:
-                    st.warning('Please enter your OpenAI API key to continue.')
+                elif not api_key_validity:
+                    st.warning('Please enter a valid OpenAI API Key to continue.')
 
 
         if st.button('Clear Chat History'):
@@ -445,7 +487,7 @@ if __name__ == "__main__":
 
     # if the user entered a question
     if question := st.chat_input(placeholder="Suggest meeting on Zoom or Team / Change the tone"):
-        if api_key:
+        if api_key_validity:
             st.session_state.email_history.append(
                 HumanMessage(content=f'Please amend and rewrite the same email by {question}')
             )
@@ -457,5 +499,5 @@ if __name__ == "__main__":
 
             st.session_state.email_history.append(AIMessage(content=response.content))
             st.chat_message('assistant').markdown(response.content)
-        elif not api_key:
-            st.warning('Please enter your OpenAI API Key to continue.')
+        elif not api_key_validity:
+            st.warning('Please enter a valid OpenAI API Key to continue.')

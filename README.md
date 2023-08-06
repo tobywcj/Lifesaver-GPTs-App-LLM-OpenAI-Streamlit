@@ -14,8 +14,18 @@ This app showcases a collection of helpful GPTs:
 ## Try It for Free!
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://lifesaver-gpts-app.streamlit.app/)
 
-### Enter the OpenAI API key in Streamlit Community Cloud
+### 1. Get an OpenAI API key 🔑
+1. Go to https://platform.openai.com/account/api-keys.
+2. Click on the `+ Create new secret key` button.
+3. Click on the `Create secret key` button.
 
+#### 2. Two methods to enter your API key
+In terms of security, using the secrets manager is considered more secure because it provides encryption and an additional layer of protection for sensitive information like API keys. It minimizes the risk of exposing the API key accidentally or through unauthorized access. 
+
+##### User input
+1. Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
+
+### 2. Streamlit Secrets Management
 To set the OpenAI API key as an environment variable in Streamlit apps:
 
 1. At the lower right corner, click on < Manage app then click on the vertical "..." followed by clicking on Settings.
@@ -24,11 +34,12 @@ To set the OpenAI API key as an environment variable in Streamlit apps:
     OPENAI_API_KEY='xxxxxxxxxx'
     ```
 
-### Get an OpenAI API key 🔑
-1. Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
-2. Go to https://platform.openai.com/account/api-keys.
-3. Click on the `+ Create new secret key` button.
-4. Click on the `Create secret key` button.
+### Your API key is safe
+- 🔒 Encryption - Your API key will be encrypted both in memory and at - rest, providing an extra layer of security.
+- 🛡 Scope isolation - The API key will be scoped to your Streamlit app.
+- 🙅‍♂️ Inaccessibility from client - The client browser will not be able to access the API key stored in st.secret.
+- 🙌 Easy management - You can store and access the API key within your Streamlit app code using the simple st.secret API.
+- ✅ Separation of concerns - st.secret enforces separating your API key from your app logic, following best practices.
 
 ## Run it locally
 

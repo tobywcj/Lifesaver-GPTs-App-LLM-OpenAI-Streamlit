@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import(
     SystemMessage, # set the behavior of the assistant
@@ -6,6 +7,27 @@ from langchain.schema import(
     AIMessage #  store prior responses
 )
 
+
+
+
+def validate_openai_api_key(api_key):
+    import openai
+
+    openai.api_key = api_key
+
+    with st.spinner('Validating API key...'):
+        try:
+            response = openai.Completion.create(
+                engine="davinci",
+                prompt="This is a test.",
+                max_tokens=5
+            )
+            # print(response)
+            validity = True
+        except:
+            validity = False
+
+    return validity
 
 
 def fitness_plan_prompt(llm, age, gender, height, current_weight, medical_conditions,
@@ -96,8 +118,28 @@ if __name__ == "__main__":
 
     with st.sidebar:
 
-        # text_input for the OpenAI API key of user
-        api_key = st.text_input("OpenAI API Key", key="api_key", type="password")
+        # Setting up the OpenAI API key via secrets manager
+        if 'OPENAI_API_KEY' in st.secrets:
+            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
+            if api_key_validity:
+                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
+            else:
+                st.error('🚨 API key is invalid and please input again')
+        # Setting up the OpenAI API key via user input
+        else:
+            api_key_input = st.text_input("OpenAI API Key", type="password")
+            api_key_validity = validate_openai_api_key(api_key_input)
+
+            if api_key_input and api_key_validity:
+                os.environ['OPENAI_API_KEY'] = api_key_input
+                st.success("✅ API key is valid and set")
+            elif api_key_input and api_key_validity == False:
+                st.error('🚨 API key is invalid and please input again')
+
+            if not api_key_input:
+                st.warning('Please input your OpenAI API Key')
+        
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
         st.divider()
@@ -121,7 +163,7 @@ if __name__ == "__main__":
         language = st.text_input('Language')
 
         if st.button('Create your Personal Fitness Plan'):
-            if api_key:
+            if api_key_validity:
                 if age and gender and height and current_weight and medical_conditions and food_allergies and fitness_goals and workout_days and exercise_preference and diet_preference and meals_per_day and snacks_per_day and foods_disliked:
                     with st.spinner('Creating your personal fitness plan ...'):
                         personal_plan = fitness_plan_prompt(llm, age, gender, height, current_weight, medical_conditions,
@@ -133,7 +175,7 @@ if __name__ == "__main__":
                     st.session_state.fitness_history.append(AIMessage(content=personal_plan))
                 elif not age or not gender or not height or not current_weight or not medical_conditions or not food_allergies or not fitness_goals or not workout_days or not exercise_preference or not diet_preference or not meals_per_day or not snacks_per_day or not foods_disliked:
                     st.warning('Please fill in all the fields.')
-            elif not api_key:
+            elif not api_key_validity:
                 st.warning('Please enter your OpenAI API key to continue.')
 
         if st.button('Clear Chat History'):
@@ -160,7 +202,7 @@ if __name__ == "__main__":
     question = st.chat_input(placeholder="Ask me anything about Fitness and Health")
 
     if question:
-        if api_key:
+        if api_key_validity:
             st.session_state.fitness_history.append(
                 HumanMessage(content=question)
             )
@@ -170,7 +212,7 @@ if __name__ == "__main__":
                 response = llm(st.session_state.fitness_history)
 
             st.session_state.fitness_history.append(AIMessage(content=response.content))
-        elif not api_key:
+        elif not api_key_validity:
             st.warning('Please enter your OpenAI API key to continue.')
 
     # displaying the messages (chat history)
