@@ -22,10 +22,10 @@ This app showcases a collection of helpful GPTs:
 #### 2. Two methods to enter your API key
 In terms of security, using the secrets manager is considered more secure because it provides encryption and an additional layer of protection for sensitive information like API keys. It minimizes the risk of exposing the API key accidentally or through unauthorized access. 
 
-##### User input
+#### User input
 1. Set up your OpenAI API Key by entering it in the app's sidebar. You can obtain an API key from the OpenAI Platform. 🔑
 
-### 2. Streamlit Secrets Management
+#### Streamlit Secrets Management
 To set the OpenAI API key as an environment variable in Streamlit apps:
 
 1. At the lower right corner, click on < Manage app then click on the vertical "..." followed by clicking on Settings.
