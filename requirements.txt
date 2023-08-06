@@ -1,16 +1,10 @@
 openai
 langchain
 chromadb
-docx2txt
-
-unstructured
-pdf2image
-pdfminer.six
 
 streamlit
 streamlit-chat
 
 tiktoken
-wikipedia
 watchdog
 duckduckgo-search
