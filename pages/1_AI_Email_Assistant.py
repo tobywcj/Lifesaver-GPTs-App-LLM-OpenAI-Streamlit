@@ -6,30 +6,9 @@ from langchain.schema import(
     HumanMessage, # what we ask
     AIMessage #  store prior responses
 )
-# Email prompts
 from langchain.chains import LLMChain
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 
-
-
-def validate_openai_api_key(api_key):
-    import openai
-
-    openai.api_key = api_key
-
-    with st.spinner('Validating API key...'):
-        try:
-            response = openai.Completion.create(
-                engine="davinci",
-                prompt="This is a test.",
-                max_tokens=5
-            )
-            # print(response)
-            validity = True
-        except:
-            validity = False
-
-    return validity
 
 
 def schedule_meeting(llm, name, relationship, discussion_goal):
@@ -55,6 +34,7 @@ def follow_up(llm, my_position, my_company, our_product_or_service, client_name,
     prompt = PromptTemplate(
         input_variables=["my_position", "my_company", "our_product_or_service", "client_name", "client_company", "event", "benefits"],
         template=template
+
     )
 
     chain = LLMChain(llm=llm, prompt=prompt)
@@ -214,40 +194,28 @@ if __name__ == "__main__":
 
     ############################################################ SIDEBAR widgets ############################################################
 
-    with st.sidebar:
-
-        # Setting up the OpenAI API key via secrets manager
-        if 'OPENAI_API_KEY' in st.secrets:
-            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
-            if api_key_validity:
-                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
-            else:
-                st.error('🚨 API key is invalid and please input again')
-        # Setting up the OpenAI API key via user input
-        else:
-            api_key_input = st.text_input("OpenAI API Key", type="password")
-            api_key_validity = validate_openai_api_key(api_key_input)
-
-            if api_key_input and api_key_validity:
-                os.environ['OPENAI_API_KEY'] = api_key_input
-                st.success("✅ API key is valid and set")
-            elif api_key_input and api_key_validity == False:
-                st.error('🚨 API key is invalid and please input again')
-
-            if not api_key_input:
-                st.warning('Please input your OpenAI API Key')
-        
-        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+    with st.sidebar:   
 
         with st.expander('Creativity'):
             temperature = st.slider('Temperature:', min_value=0.0, max_value=2.0, value=1.0, step=0.1)
             st.info('Larger the number, More Creative is the response.')
-
-        if api_key_validity:
+        
+        if 'OPENAI_API_KEY' in os.environ:
+            api_key_validity  = True
             llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=temperature)
+            st.success("Now using OpenAI's ChatGPT-3.5-Turbo")
+        # elif 'HUGGINGFACEHUB_API_TOKEN' in st.secrets:
+        #     api_key_validity  = True
+        #     st.success("Now using Google's FLAN-T5, comparable to GPT-3.")
+        #     st.info("To use ChatGPT-3.5-Turbo, please go to Home page.")
+        #     llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": temperature, "max_length": 512})
+        else:
+            st.warning("Please go to Home page to follow the instructions to use our personalized GPTs.")
+            api_key_validity  = False
 
         st.divider()
+
+        #########################################################################################################################################################  
 
         # Different email prompts expanders
         st.subheader('Which Type of email you\'re writing?')
@@ -334,7 +302,7 @@ if __name__ == "__main__":
                     if person_or_group and project and completed_tasks and upcoming_milestones and challenges:
                         with st.spinner('Generating your email ...'):
                             project_update_email = project_update(llm, person_or_group, project, completed_tasks, upcoming_milestones, challenges)
-                            st.session_state.email_history.append(AIMessage(content=request_sth_email))
+                            st.session_state.email_history.append(AIMessage(content=project_update_email))
 
                     elif not information_or_action or not request_purpose:
                         st.warning('Please fill in all the fields.')
@@ -499,5 +467,6 @@ if __name__ == "__main__":
 
             st.session_state.email_history.append(AIMessage(content=response.content))
             st.chat_message('assistant').markdown(response.content)
+
         elif not api_key_validity:
             st.warning('Please enter a valid OpenAI API Key to continue.')

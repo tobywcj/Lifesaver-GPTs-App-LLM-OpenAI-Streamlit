@@ -8,26 +8,6 @@ from langchain.tools import DuckDuckGoSearchRun
 
 
 
-def validate_openai_api_key(api_key):
-    import openai
-
-    openai.api_key = api_key
-
-    with st.spinner('Validating API key...'):
-        try:
-            response = openai.Completion.create(
-                engine="davinci",
-                prompt="This is a test.",
-                max_tokens=5
-            )
-            # print(response)
-            validity = True
-        except:
-            validity = False
-
-    return validity
-
-
 # clear the chat history from streamlit session state
 def clear_history():
     if 'internet_cb_history' in st.session_state:
@@ -43,35 +23,26 @@ if __name__ == "__main__":
 
     if "internet_cb_history" not in st.session_state:
         st.session_state.internet_cb_history= [
-            {"role": "assistant", "content": "Hi, I'm a chatbot who can connect to the internet. How can I help you?"}
+            {"role": "assistant", "content": "Hi, I'm a chatbot who can connect to the internet, showing my thinking process. I'm transparent, not a black box. How can I help you?"}
         ]
 
     ############################################################ SIDEBAR widgets ############################################################
 
     with st.sidebar:
+
         # Setting up the OpenAI API key via secrets manager
-        if 'OPENAI_API_KEY' in st.secrets:
-            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
-            if api_key_validity:
-                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
-            else:
-                st.error('🚨 API key is invalid and please input again')
-        # Setting up the OpenAI API key via user input
+        if 'OPENAI_API_KEY' in os.environ:
+            api_key_validity  = True
+            llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key_validity=api_key_validity, streaming=True)
+            st.success("Now using OpenAI's ChatGPT-3.5-Turbo")
+        # elif 'HUGGINGFACEHUB_API_TOKEN' in st.secrets:
+        #     api_key_validity  = True
+        #     st.success("Now using Google's FLAN-T5, comparable to GPT-3.")
+        #     st.info("To use ChatGPT-3.5-Turbo, please go to Home page.")
+        #     llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": temperature, "max_length": 512})
         else:
-            api_key_input = st.text_input("OpenAI API Key", type="password")
-            api_key_validity = validate_openai_api_key(api_key_input)
-
-            if api_key_input and api_key_validity:
-                os.environ['OPENAI_API_KEY'] = api_key_input
-                st.success("✅ API key is valid and set")
-            elif api_key_input and api_key_validity == False:
-                st.error('🚨 API key is invalid and please input again')
-
-            if not api_key_input:
-                st.warning('Please input your OpenAI API Key')
-        
-        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+            st.warning("Please go to Home page to follow the instructions to use our personalized GPTs.")
+            api_key_validity  = False
 
         st.divider()
 
@@ -95,7 +66,6 @@ if __name__ == "__main__":
             st.session_state.internet_cb_history.append({"role": "user", "content": question})
             st.chat_message("user").write(question)
 
-            llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key_validity=api_key_validity, streaming=True)
             search = DuckDuckGoSearchRun(name="Search")
             search_agent = initialize_agent([search], llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, handle_parsing_errors=True)
             with st.chat_message("assistant"):

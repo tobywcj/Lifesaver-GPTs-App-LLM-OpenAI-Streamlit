@@ -5,22 +5,25 @@ import os
 
 def validate_openai_api_key(api_key):
     import openai
-
+    
     openai.api_key = api_key
 
     with st.spinner('Validating API key...'):
+        error = None
         try:
             response = openai.Completion.create(
-                engine="davinci",
+                engine="text-embedding-ada-002",
                 prompt="This is a test.",
                 max_tokens=5
             )
             # print(response)
             validity = True
-        except:
-            validity = False
 
-    return validity
+        except Exception as e:
+            validity = False
+            error = e
+
+    return validity, error
 
 
 if __name__ == "__main__":
@@ -29,30 +32,41 @@ if __name__ == "__main__":
 
     with st.sidebar:
 
+        # if 'HUGGINGFACEHUB_API_TOKEN' in st.secrets:
+        #     st.info("Default powered by Google's FLAN-T5, comparable to GPT-3.")
+        # else:
+        #     st.info("Input your HuggingFace API Token in the Streamlit Secrets Management [Get an HuggingFace API Token](https://huggingface.co/join).")
+
+
         # Setting up the OpenAI API key via secrets manager
         if 'OPENAI_API_KEY' in st.secrets:
-            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
+            api_key_validity, error = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
+
             if api_key_validity:
                 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
+                st.success("✅ API key is valid and set via Encrytion provided by Streamlit.")
             else:
-                st.error('🚨 API key is invalid and please input again')
+                st.error(f'🚨 {error}')
+
         # Setting up the OpenAI API key via user input
         else:
             api_key_input = st.text_input("OpenAI API Key", type="password")
-            api_key_validity = validate_openai_api_key(api_key_input)
+            api_key_validity, error = validate_openai_api_key(api_key_input)
 
             if api_key_input and api_key_validity:
                 os.environ['OPENAI_API_KEY'] = api_key_input
-                st.success("✅ API key is valid and set")
+                st.success("✅ API key is valid and encrypted. Now using ChatGPT-3.5-Turbo.")
             elif api_key_input and api_key_validity == False:
-                st.error('🚨 API key is invalid and please input again')
+                st.error(f'🚨 {error}')
 
             if not api_key_input:
-                st.warning('Please input your OpenAI API Key')
+                st.warning('To use our GPTs, please input your OpenAI API Key below or use the Streamlit Secrets Management.')
         
         "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
         "[View the source code](https://github.com/tobywcj/Lifesaver-GPTs-App.git)"
+
+        
+
         
     ############################################################ MAIN PAGE widgets ############################################################
 
@@ -61,7 +75,7 @@ if __name__ == "__main__":
 
     st.write('''Love or hate it, ChatGPT is changing the game for professionals worldwide. These AI tools won't replace you, they save your time for you to do the things you love.😊🤖
             \nwe have gathered a diverse range of Large Language Model (LLM) AI bots to assist you in various tasks and provide valuable insights. 🚀🔍
-            \nEach bot has been designed to cater to specific needs and offer a unique experience.💪🌟''')
+            \nThe AI future should be personalized, multi-sensed, and open-sourced💪🌟''')
 
     st.divider()
 

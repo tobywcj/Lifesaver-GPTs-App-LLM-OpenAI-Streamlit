@@ -36,26 +36,6 @@ def load_document(file):
     return data
 
 
-def validate_openai_api_key(api_key):
-    import openai
-
-    openai.api_key = api_key
-
-    with st.spinner('Validating API key...'):
-        try:
-            response = openai.Completion.create(
-                engine="davinci",
-                prompt="This is a test.",
-                max_tokens=5
-            )
-            # print(response)
-            validity = True
-        except:
-            validity = False
-
-    return validity
-
-
 # splitting data in chunks
 def chunk_data(data, chunk_size=512, chunk_overlap=20):
     from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -221,32 +201,6 @@ if __name__ == "__main__":
 
     ############################################################ SIDEBAR widgets ############################################################ (for params configuration)
     with st.sidebar:
-        
-        # Setting up the OpenAI API key via secrets manager
-        if 'OPENAI_API_KEY' in st.secrets:
-            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
-            if api_key_validity:
-                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
-            else:
-                st.error('🚨 API key is invalid and please input again')
-        # Setting up the OpenAI API key via user input
-        else:
-            api_key_input = st.text_input("OpenAI API Key", type="password")
-            api_key_validity = validate_openai_api_key(api_key_input)
-
-            if api_key_input and api_key_validity:
-                os.environ['OPENAI_API_KEY'] = api_key_input
-                st.success("✅ API key is valid and set")
-            elif api_key_input and api_key_validity == False:
-                st.error('🚨 API key is invalid and please input again')
-
-            if not api_key_input:
-                st.warning('Please input your OpenAI API Key')
-        
-        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-
-        st.divider()
 
         # Response Configuration Expander
         with st.expander('Response Configuration'):
@@ -267,6 +221,20 @@ if __name__ == "__main__":
             summary_chain = st.radio('Summary Chain:', summary_chains, index=0)
             st.info('''Map Reduce & Refine are for large documents, giving a better summarization but require a Paid Tier of your OpenAI account for higher rate limit
                     \n\n(Free Tier only allows 2 chunks for Map Reduce & 3 chunks for Refine)''')
+            
+         # Setting up the OpenAI API key via secrets manager
+        if 'OPENAI_API_KEY' in os.environ:
+            api_key_validity  = True
+            llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
+            st.success("Now using OpenAI's ChatGPT-3.5-Turbo")
+        # elif 'HUGGINGFACEHUB_API_TOKEN' in st.secrets:
+        #     api_key_validity  = True
+        #     st.success("Now using Google's FLAN-T5, comparable to GPT-3.")
+        #     st.info("To use ChatGPT-3.5-Turbo, please go to Home page.")
+        #     llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": temperature, "max_length": 512})
+        else:
+            st.warning("Please go to Home page to follow the instructions to use our personalized GPTs.")
+            api_key_validity  = False
 
         st.divider()
 
@@ -329,7 +297,7 @@ if __name__ == "__main__":
             # Generating the question response
             with st.spinner('Generating response ...'):
                 vector_store = st.session_state.vs
-                llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
+                # llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
                 question, response = ask_with_memory(llm, vector_store, question, st.session_state.doc_history, k)
                 st.session_state.doc_history.append((question, response))
                 st.chat_message('assistant').markdown(response)
@@ -341,7 +309,7 @@ if __name__ == "__main__":
     # Generating the summary of the document
     if summary_button and st.session_state.vs:
         with st.spinner('Summarizing document ...'):
-            llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
+            # llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=temperature)
             if summary_chain == 'Stuff':
                 summarize_response = stuff_summary_response(llm, st.session_state.chunks)
             elif summary_chain == 'Map Reduce':

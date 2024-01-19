@@ -9,27 +9,6 @@ from langchain.schema import(
 
 
 
-
-def validate_openai_api_key(api_key):
-    import openai
-
-    openai.api_key = api_key
-
-    with st.spinner('Validating API key...'):
-        try:
-            response = openai.Completion.create(
-                engine="davinci",
-                prompt="This is a test.",
-                max_tokens=5
-            )
-            # print(response)
-            validity = True
-        except:
-            validity = False
-
-    return validity
-
-
 def fitness_plan_prompt(llm, age, gender, height, current_weight, medical_conditions,
                        food_allergies, fitness_goals, workout_days, exercise_preference,
                        diet_preference, meals_per_day, snacks_per_day, foods_disliked,
@@ -112,35 +91,23 @@ if __name__ == "__main__":
     if 'fitness_history' not in st.session_state:
         st.session_state.fitness_history = [SystemMessage(content='You are a highly renowned health and nutrition Fitness expert.')]
 
-    llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.5)
-
     ############################################################ SIDEBAR widgets ############################################################
 
     with st.sidebar:
 
-        # Setting up the OpenAI API key via secrets manager
-        if 'OPENAI_API_KEY' in st.secrets:
-            api_key_validity = validate_openai_api_key(st.secrets['OPENAI_API_KEY'])
-            if api_key_validity:
-                os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
-                st.success("✅ API key is valid and set via Encrytion provided by Streamlit")
-            else:
-                st.error('🚨 API key is invalid and please input again')
-        # Setting up the OpenAI API key via user input
+         # Setting up the OpenAI API key via secrets manager
+        if 'OPENAI_API_KEY' in os.environ:
+            api_key_validity  = True
+            llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0.5)
+            st.success("Now using OpenAI's ChatGPT-3.5-Turbo")
+        # elif 'HUGGINGFACEHUB_API_TOKEN' in st.secrets:
+        #     api_key_validity  = True
+        #     st.success("Now using Google's FLAN-T5, comparable to GPT-3.")
+        #     st.info("To use ChatGPT-3.5-Turbo, please go to Home page.")
+        #     llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature": temperature, "max_length": 512})
         else:
-            api_key_input = st.text_input("OpenAI API Key", type="password")
-            api_key_validity = validate_openai_api_key(api_key_input)
-
-            if api_key_input and api_key_validity:
-                os.environ['OPENAI_API_KEY'] = api_key_input
-                st.success("✅ API key is valid and set")
-            elif api_key_input and api_key_validity == False:
-                st.error('🚨 API key is invalid and please input again')
-
-            if not api_key_input:
-                st.warning('Please input your OpenAI API Key')
-        
-        "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+            st.warning("Please go to Home page to follow the instructions to use our personalized GPTs.")
+            api_key_validity  = False
 
         st.divider()
 
